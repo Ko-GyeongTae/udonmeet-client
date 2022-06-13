@@ -12,6 +12,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import useAuth from "../hooks/useAuth";
 
 function Copyright(props: any) {
   return (
@@ -34,13 +35,23 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 export default function Register() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const { loading, register } = useAuth();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get("email"),
       password: data.get("password"),
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName"),
+      familyName: ((data.get("firstName") as string) +
+        data.get("lastName")) as string,
     });
+    register(
+      data.get("email") as string,
+      ((data.get("firstName") as string) + data.get("lastName")) as string,
+      data.get("password") as string
+    );
   };
 
   return (
@@ -124,12 +135,13 @@ export default function Register() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
               Sign Up
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/login" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>
