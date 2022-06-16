@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { getCookie } from "./cookie";
 import errHandler from "./error";
 
 export interface requestApiV2DTO extends AxiosRequestConfig {
@@ -11,10 +12,11 @@ const RequestApi = (p: requestApiV2DTO) => {
       baseURL: "http://localhost:4101",
       url: p.url,
       data: p.data,
+      withCredentials: true,
       headers: Object.assign(
         {},
         p.isNeedToken
-          ? { Authorization: localStorage.getItem("accessToken") ?? "" }
+          ? { Authorization: `Bearer ${getCookie("accessToken")}` }
           : {},
         p.headers
       ),
