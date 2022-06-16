@@ -41,7 +41,7 @@ class AuthController {
     try {
       return RequestApi({
         url: "/user/sign-out",
-        method: "POST",
+        method: "PUT",
         isNeedToken: true,
       });
     } catch (e: any) {
