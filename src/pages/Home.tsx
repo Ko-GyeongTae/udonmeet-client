@@ -22,6 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import useAuth from "../hooks/useAuth";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -80,6 +81,7 @@ const theme = createTheme();
 
 export default function Home() {
   const menuId = "primary-search-account-menu";
+  const { logout } = useAuth();
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -92,7 +94,7 @@ export default function Home() {
             aria-label="account of current user"
             aria-controls={menuId}
             aria-haspopup="true"
-            onClick={() => console.log("test")}
+            onClick={() => logout()}
             color="inherit"
           >
             <AccountCircle />
