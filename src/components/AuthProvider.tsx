@@ -1,74 +1,85 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthContext";
 import { User } from "../types/user";
 import AuthController from "../utils/api/auth";
+import { getCookie } from "../utils/libs/cookie";
+import jwt, { JwtPayload } from "jwt-decode";
+
+interface CustomJwtPayload extends JwtPayload {
+  id: string;
+  name: string;
+  email: string;
+}
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element {
-  const [user, setUser] = useState<User>();
-  const [error, setError] = useState<any>();
+  const userInfoStr = localStorage.getItem("user");
+  const user: User | undefined = userInfoStr
+    ? JSON.parse(userInfoStr)
+    : undefined;
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingInitial, setLoadingInitial] = useState<boolean>(true);
 
-  const location = useLocation();
   const navigate = useNavigate();
   const authContainer = new AuthController();
 
   useEffect(() => {
     setLoadingInitial(false);
+    const token = getCookie("accessToken");
+    if (!token) {
+      localStorage.removeItem("user");
+    } else {
+      const decoded = jwt<CustomJwtPayload>(token);
+      Date.now() >= decoded.exp! * 1000 && localStorage.removeItem("user");
+      delete decoded.exp;
+      delete decoded.iat;
+      JSON.stringify(decoded) !== JSON.stringify(user) && logout();
+      console.log(JSON.stringify(decoded) === JSON.stringify(user));
+    }
   }, []);
 
-  useEffect(() => {
-    if (error) setError(null);
-  }, [error, location.pathname]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function login(email: string, password: string) {
     setLoading(true);
     authContainer
       .signIn({ email, password })
       .then((res) => {
-        navigate("/home");
-        setUser(res?.data);
+        navigate("/");
+        localStorage.setItem("user", JSON.stringify(res?.data));
       })
       .catch(() => {
         navigate("/login");
-        setUser(undefined);
+        localStorage.removeItem("user");
       })
       .finally(() => setLoading(false));
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  function register(email: string, name: string, password: string) {
-    setLoading(true);
-    authContainer
-      .signUp({ email, name, password })
-      .then(() => navigate("/login"))
-      .finally(() => setLoading(false));
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function logout() {
-    authContainer.signOut().then(() => {
-      navigate("/login");
-      setUser(undefined);
-    });
+    authContainer
+      .signOut()
+      .then((res) => {
+        if (res?.status === 200) {
+          navigate("/login");
+          localStorage.removeItem("user");
+        }
+      })
+      .catch((e) => {
+        alert(e);
+      });
   }
 
   const memoedValue = useMemo(
     () => ({
       user,
       loading,
-      error,
       login,
-      register,
       logout,
     }),
-    [user, loading, error, login, register, logout]
+    [user, loading, login, logout]
   );
 
   return (
