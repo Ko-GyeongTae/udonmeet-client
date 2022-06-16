@@ -13,18 +13,48 @@ function AuthenticatedRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function UnAuthenticatedRoute({ children }: { children: JSX.Element }) {
+  const { user } = useAuth();
+
+  if (user) return <Navigate to="/" />;
+
+  return children;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route
-          path="/home"
+          path="/"
           element={
             <AuthenticatedRoute>
               <Home />
             </AuthenticatedRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <UnAuthenticatedRoute>
+              <Login />
+            </UnAuthenticatedRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <UnAuthenticatedRoute>
+              <Register />
+            </UnAuthenticatedRoute>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <UnAuthenticatedRoute>
+              <Navigate replace to="/login" />
+            </UnAuthenticatedRoute>
           }
         />
       </Routes>
