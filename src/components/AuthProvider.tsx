@@ -33,6 +33,8 @@ export function AuthProvider({
     const token = getCookie("accessToken");
     if (!token) {
       localStorage.removeItem("user");
+    } else if (localStorage.getItem("user") === undefined) {
+      localStorage.removeItem("user");
     } else {
       const decoded = jwt<CustomJwtPayload>(token);
       Date.now() >= decoded.exp! * 1000 && localStorage.removeItem("user");
@@ -48,8 +50,10 @@ export function AuthProvider({
     authContainer
       .signIn({ email, password })
       .then((res) => {
-        navigate("/");
-        localStorage.setItem("user", JSON.stringify(res?.data));
+        if (res?.status === 200) {
+          navigate("/");
+          localStorage.setItem("user", JSON.stringify(res?.data));
+        }
       })
       .catch(() => {
         navigate("/login");
