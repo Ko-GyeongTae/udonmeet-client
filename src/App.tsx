@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./components/AuthProvider";
 import useAuth from "./hooks/useAuth";
+import About from "./pages/About";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Write from "./pages/Write";
 
 function AuthenticatedRoute({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
@@ -30,6 +32,22 @@ export default function App() {
           element={
             <AuthenticatedRoute>
               <Home />
+            </AuthenticatedRoute>
+          }
+        />
+        <Route
+          path="/post"
+          element={
+            <AuthenticatedRoute>
+              <Write />
+            </AuthenticatedRoute>
+          }
+        />
+        <Route
+          path="/post/:id"
+          element={
+            <AuthenticatedRoute>
+              <About />
             </AuthenticatedRoute>
           }
         />
