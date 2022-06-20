@@ -9,16 +9,16 @@ const RequestApi = (p: requestApiV2DTO) => {
   try {
     const res = axios({
       method: p.method,
-      baseURL: "http://localhost:4101",
+      baseURL: process.env.REACT_APP_BASE_URL,
       url: p.url,
-      data: p.data,
+      data: Object.assign({}, p.data),
       withCredentials: true,
       headers: Object.assign(
         {},
+        p.headers,
         p.isNeedToken
           ? { Authorization: `Bearer ${getCookie("accessToken")}` }
-          : {},
-        p.headers
+          : {}
       ),
     }).catch((err) => {
       errHandler(err);
