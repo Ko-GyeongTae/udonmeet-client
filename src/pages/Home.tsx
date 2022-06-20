@@ -1,4 +1,5 @@
-import React from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -11,6 +12,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "@mui/material/Link";
 import {
   createTheme,
@@ -23,6 +25,8 @@ import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import useAuth from "../hooks/useAuth";
+import PostController from "../utils/api/post";
+import { useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -75,13 +79,20 @@ function Copyright() {
   );
 }
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
 const theme = createTheme();
 
 export default function Home() {
-  const menuId = "primary-search-account-menu";
+  const [cards, setCards] = useState<Array<any>>([]);
   const { logout } = useAuth();
+  const postController = new PostController();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    postController
+      .getPostList()
+      .then((res) => setCards(res?.data))
+      .catch((e) => alert(e));
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -92,7 +103,16 @@ export default function Home() {
             size="large"
             edge="end"
             aria-label="account of current user"
-            aria-controls={menuId}
+            aria-haspopup="true"
+            onClick={() => navigate("/post")}
+            color="inherit"
+          >
+            <BorderColorIcon />
+          </IconButton>
+          <IconButton
+            size="large"
+            edge="end"
+            aria-label="account of current user"
             aria-haspopup="true"
             onClick={() => logout()}
             color="inherit"
@@ -147,7 +167,7 @@ export default function Home() {
           {/* End hero unit */}
           <Grid container spacing={4}>
             {cards.map((card) => (
-              <Grid item key={card} xs={12} sm={6} md={4}>
+              <Grid item key={card.id} xs={12} sm={6} md={4}>
                 <Card
                   sx={{
                     height: "100%",
@@ -162,17 +182,14 @@ export default function Home() {
                       //   pt: "56.25%",
                       pt: 0,
                     }}
-                    image="https://source.unsplash.com/random"
+                    image={card.assetUrl}
                     alt="random"
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
-                      Heading
+                      {card.title}
                     </Typography>
-                    <Typography>
-                      This is a media card. You can use this section to describe
-                      the content.
-                    </Typography>
+                    <Typography>{card.content}</Typography>
                   </CardContent>
                   <CardActions>
                     <Button size="small">View</Button>
