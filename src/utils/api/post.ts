@@ -19,6 +19,16 @@ export interface updatePostDto {
 }
 
 class PostController {
+  getPostList(): Promise<void | AxiosResponse> {
+    try {
+      return RequestApi({
+        url: "/post",
+        method: "GET",
+      });
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  }
   createPost(payload: createPostDto): Promise<void | AxiosResponse> {
     try {
       return RequestApi({
@@ -36,7 +46,7 @@ class PostController {
     try {
       return RequestApi({
         url: "/post/" + id,
-        method: "POST",
+        method: "PUT",
         data,
       });
     } catch (e: any) {
