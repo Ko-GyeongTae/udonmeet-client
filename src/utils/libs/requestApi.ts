@@ -7,6 +7,7 @@ export interface requestApiV2DTO extends AxiosRequestConfig {
 }
 const RequestApi = (p: requestApiV2DTO) => {
   try {
+    console.log(p.data);
     const res = axios({
       method: p.method,
       baseURL: process.env.REACT_APP_BASE_URL,
