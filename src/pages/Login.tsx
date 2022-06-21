@@ -71,6 +71,15 @@ export default function Login() {
               alignItems: "center",
             }}
           >
+            <Typography
+              component="h1"
+              variant="h2"
+              align="center"
+              color="text.primary"
+              gutterBottom
+            >
+              우동맛남
+            </Typography>
             <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
               <LockOutlinedIcon />
             </Avatar>
