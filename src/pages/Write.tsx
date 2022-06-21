@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
@@ -12,6 +12,8 @@ import axios from "axios";
 import { PhotoCamera } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PostController from "../utils/api/post";
+import UploadController from "../utils/api/upload";
+import { useNavigate } from "react-router-dom";
 
 function Copyright() {
   return (
@@ -30,31 +32,49 @@ const theme = createTheme();
 
 export default function Write() {
   const assetInput = useRef<HTMLInputElement>(null);
-  const [asset, setAsset] = useState<string>("");
-  const [location, setLocation] = useState<string>("test");
+  const [asset, setAsset] = useState<string | null>(null);
+  const [location, setLocation] = useState<string>("");
+  const navigate = useNavigate();
   const postController = new PostController();
+  const uploadController = new UploadController();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    postController.createPost({
-      title: data.get("title") as string,
-      content: data.get("content") as string,
-      place: data.get("place") as string,
-      location: data.get("location") as string,
-      assetUrl: asset,
-    });
-    // login(data.get("email") as string, data.get("password") as string);
+    postController
+      .createPost({
+        title: data.get("title") as string,
+        content: data.get("content") as string,
+        place: data.get("place") as string,
+        location: data.get("location") as string,
+        assetUrl: asset ? asset : "",
+      })
+      .then(() => {
+        alert("게시글 작성에 성공했습니다.");
+        navigate("/");
+      })
+      .catch((e) => {
+        alert(e);
+      });
   };
 
   const handleImage = (event: any) => {
     const formData = new FormData();
     formData.append("images", event.target.files[0]);
-    axios
-      .post(`http://localhost:4102/upload/list`, formData)
+    // axios
+    //   .post(`http://localhost:4102/upload/list`, formData)
+    //   .then((res) => {
+    //     console.log(res.data[0]);
+    //     setAsset(res.data[0]);
+    //   })
+    //   .catch((e) => {
+    //     alert(e);
+    //   });
+    uploadController
+      .createPost(formData)
       .then((res) => {
-        console.log(res.data[0]);
-        setAsset(res.data[0]);
+        console.log(res?.data);
+        setAsset(res?.data[0]);
       })
       .catch((e) => {
         alert(e);
@@ -62,7 +82,7 @@ export default function Write() {
   };
 
   const deleteImage = (event: any) => {
-    setAsset("");
+    setAsset(null);
   };
 
   const clickUpload = () => {
@@ -77,8 +97,6 @@ export default function Write() {
 
   const success = (position: any) => {
     const { latitude, longitude } = position.coords;
-    console.log(position);
-    console.log(process.env.REACT_APP_KAKAO_API);
 
     axios
       .get(
@@ -197,6 +215,7 @@ export default function Write() {
               <Button
                 variant="contained"
                 onClick={clickUpload}
+                disabled={asset !== null ? true : false}
                 sx={{ margin: 1 }}
                 startIcon={<PhotoCamera />}
               >
@@ -219,7 +238,11 @@ export default function Write() {
                 maxWidth="lg"
                 sx={{ width: "100%", alignItems: "center" }}
               >
-                <img src={asset} style={{ width: "40vh", height: "auto" }} />
+                <img
+                  src={asset!}
+                  alt="img"
+                  style={{ width: "40vh", height: "auto" }}
+                />
               </Container>
             </Box>
           </Container>
